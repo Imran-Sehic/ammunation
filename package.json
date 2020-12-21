@@ -1,0 +1,35 @@
+{
+  "name": "an_nodejs",
+  "version": "1.0.0",
+  "description": "backend for the AmmuNation webshop",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha test/**/*.js",
+    "start": "nodemon server.js"
+  },
+  "author": "Imran Šehić",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.5",
+    "email-templates": "^8.0.2",
+    "express": "^4.17.1",
+    "express-validator": "^6.8.0",
+    "jsonwebtoken": "^8.5.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.2.5",
+    "nodemailer": "^6.4.17",
+    "nodemailer-sendgrid-transport": "^0.2.0",
+    "sequelize": "^6.3.5"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^8.2.1",
+    "nodemon": "^2.0.6",
+    "sequelize-test-helpers": "^1.3.2",
+    "sinon": "^9.2.2"
+  }
+}
