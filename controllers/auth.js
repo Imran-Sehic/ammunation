@@ -24,8 +24,6 @@ exports.signup = async (req, res, next) => {
   try {
     const userWithEmail = await User.findOne({ where: { email: email } });
 
-    //console.log(Object.keys(userWithEmail.__proto__));
-
     if (userWithEmail) {
       const error = new Error("User with given email already exists!");
       error.statusCode = 422;
@@ -45,9 +43,13 @@ exports.signup = async (req, res, next) => {
       }
     );
 
-    savedUser.createWeapon_cart();
+    WeaponCart.create({
+      userId: savedUser.id
+    });
 
-    console.log(Object.keys(savedUser.__proto__));     
+    AmmoCart.create({
+      userId: savedUser.id
+    });
 
     const token = jwt.sign(
       {

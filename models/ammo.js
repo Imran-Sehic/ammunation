@@ -36,6 +36,13 @@ module.exports = (sequelize, DataTypes) => {
         this.setDataValue("imageUrl", val.join(";"));
       },
     },
+    userId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: "users",
+        key: "id",
+      },
+    }
   });
   return Ammo;
 };

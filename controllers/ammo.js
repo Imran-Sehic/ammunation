@@ -5,7 +5,9 @@ const Ammo = require("../models/ammo")(sequelize, DataTypes);
 exports.getAllAmmo = async (req, res, next) => {
   try {
     const ammo = await Ammo.findAll();
-    res.staus(200).json({ ammo: ammo });
+    res
+      .staus(200)
+      .json({ message: "Successfully retrieved all ammo!", ammo: ammo });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -14,10 +16,8 @@ exports.getAllAmmo = async (req, res, next) => {
   }
 };
 
-exports.postAmmo = (req, res, next) => {};
-
-exports.putAmmo = (req, res, next) => {};
-
 exports.getSingleAmmo = (req, res, next) => {};
 
-exports.deleteAmmo = (req, res, next) => {};
+exports.buyAmmo = (req, res, next) => {};
+
+exports.removeAmmoFromCart = (req, res, next) => {};

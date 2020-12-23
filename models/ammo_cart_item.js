@@ -9,6 +9,20 @@ module.exports = (sequelize, DataTypes) => {
     quantity: {
       type: DataTypes.INTEGER,
     },
+    ammoCartId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: "ammo_carts",
+        key: "id",
+      },
+    },
+    ammoId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: "ammos",
+        key: "id",
+      },
+    }
   });
   return AmmoCartItem;
 };

@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     userId: {
       type: DataTypes.INTEGER,
+      references: {
+        model: "users",
+        key: "id",
+      },
     },
   });
   return Weapon;

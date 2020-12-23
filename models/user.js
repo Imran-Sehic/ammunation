@@ -1,5 +1,9 @@
+const sequelize = require("../util/db");
+const { DataTypes } = require("sequelize");
+const WeaponCart = require("./weapon_cart");
+
 module.exports = (sequelize, DataTypes) => {
-const User = sequelize.define("user", {
+  const User = sequelize.define("user", {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,

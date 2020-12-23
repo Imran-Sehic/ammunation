@@ -6,6 +6,13 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       primaryKey: true,
     },
+    userId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: "users",
+        key: "id",
+      },
+    }
   });
   return AmmoCart;
 };
