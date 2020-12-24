@@ -7,17 +7,19 @@ const {
   dataTypes,
 } = require("sequelize-test-helpers");
 
-const WeaponCartItem = require("../../models/weapon-cart-item")(sequelize, dataTypes);
+const WeaponCartItem = require("../../models/weapon_cart_item")(sequelize, dataTypes);
 
 describe("weapon-cart-item model test", () => {
   const weaponCartItem = new WeaponCartItem();
 
-  checkModelName(WeaponCartItem)("weapon-cart-item");
+  checkModelName(WeaponCartItem)("weapon_cart_item");
 
   context("properties", () => {
     [
       "id",
-      "quantity"
+      "quantity",
+      "weaponCartId",
+      "weaponId"
     ].forEach(checkPropertyExists(weaponCartItem));
   });
 });

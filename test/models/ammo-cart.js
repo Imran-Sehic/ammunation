@@ -7,16 +7,17 @@ const {
   dataTypes,
 } = require("sequelize-test-helpers");
 
-const AmmoCart = require("../../models/ammo-cart")(sequelize, dataTypes);
+const AmmoCart = require("../../models/ammo_cart")(sequelize, dataTypes);
 
 describe("ammo-cart model test", () => {
   const ammoCart = new AmmoCart();
 
-  checkModelName(AmmoCart)("ammo-cart");
+  checkModelName(AmmoCart)("ammo_cart");
 
   context("properties", () => {
     [
       "id",
+      "userId"
     ].forEach(checkPropertyExists(ammoCart));
   });
 });

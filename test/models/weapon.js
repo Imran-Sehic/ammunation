@@ -23,6 +23,7 @@ describe("weapon model test", () => {
       "caliber",
       "price",
       "imageUrl",
+      "userId"
     ].forEach(checkPropertyExists(weapon));
   });
 });

@@ -7,7 +7,7 @@ const {
   dataTypes,
 } = require("sequelize-test-helpers");
 
-const User = require("../../models/user").model();
+const User = require("../../models/user")(sequelize, dataTypes);
 
 describe("user model test", () => {
   const user = new User();

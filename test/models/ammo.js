@@ -23,6 +23,7 @@ describe("ammo model test", () => {
       "caliber",
       "price",
       "imageUrl",
+      "userId"
     ].forEach(checkPropertyExists(ammo));
   });
 });

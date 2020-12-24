@@ -7,7 +7,7 @@ const auth = require("../middlewares/auth");
 router.get("/profile", auth, adminController.getProfile);
 
 router.post(
-  "/add-weapon",
+  "/create-weapon",
   auth,
   [
     body("name")
@@ -23,11 +23,11 @@ router.post(
       .withMessage("Weapon description should be at least 10 characters long!")
       .trim(),
   ],
-  adminController.addWeapon
+  adminController.createWeapon
 );
 
 router.post(
-  "/add-ammo",
+  "/create-ammo",
   auth,
   [
     body("name")
@@ -43,7 +43,7 @@ router.post(
       .withMessage("ammo should have a price!")
       .trim(),
   ],
-  adminController.addAmmo
+  adminController.createAmmo
 );
 
 router.put(
