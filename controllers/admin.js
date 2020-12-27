@@ -88,21 +88,15 @@ exports.deleteWeapon = async (req, res, next) => {
   const weaponId = req.params.weaponId;
 
   try {
-    const weapon = await Weapon.findByPk(weaponId);
+    const weapons = await req.user.getWeapons({ where: { id: weaponId } });
 
-    if (!weapon) {
-      const error = new Error("No weapon with given id was found!");
+    if(weapons.length <= 0) {
+      const error = new Error("No weapon found!");
       error.statusCode = 404;
       throw error;
     }
 
-    if (weapon.userId !== req.userId) {
-      const error = new Error("You are not allowed to delete this weapon!");
-      error.statusCode = 403;
-      throw error;
-    }
-
-    await weapon.destroy();
+    await Weapon.destroy({ where: { id: weaponId } });
 
     res.status(200).json({ message: "Weapon successfully deleted!" });
   } catch (err) {
@@ -115,6 +109,7 @@ exports.deleteWeapon = async (req, res, next) => {
 
 exports.createAmmo = (req, res, next) => {
   const { name, ammoType, quantity, caliber, price, imageUrl } = req.body;
+  console.log(Object.keys(req.user.__proto__));
 
   try {
     req.user.createAmmo({
@@ -176,21 +171,15 @@ exports.deleteAmmo = async (req, res, next) => {
   const ammoId = req.params.ammoId;
 
   try {
-    const ammo = await Ammo.findByPk(ammoId);
+    const ammos = await req.user.getAmmos({ where: { id: ammoId } });
 
-    if (!ammo) {
-      const error = new Error("No ammo with given id was found!");
+    if(ammos.length <= 0) {
+      const error = new Error("No ammo found!");
       error.statusCode = 404;
       throw error;
     }
 
-    if (ammo.userId !== req.userId) {
-      const error = new Error("You are not allowed to delete this ammo!");
-      error.statusCode = 403;
-      throw error;
-    }
-
-    await ammo.destroy();
+    await Ammo.destroy({ where: { id: ammoId } });
 
     res.status(200).json({ message: "Ammo successfully deleted!" });
   } catch (err) {

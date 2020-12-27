@@ -37,6 +37,57 @@ exports.getSingleAmmo = async (req, res, next) => {
   }
 };
 
-exports.buyAmmo = (req, res, next) => {};
+exports.buyAmmo = async (req, res, next) => {
+  const ammoId = req.params.ammoId;
+  let newQuantity = 1;
+  let ammo;
 
-exports.removeAmmoFromCart = (req, res, next) => {};
+  try {
+    const ammoCart = await req.user.getAmmo_cart();
+    const cartAmmos = await ammoCart.getAmmos({
+      where: { id: ammoId },
+    });
+
+    if (cartAmmos.length > 0) {
+      ammo = cartAmmos[0];
+      newQuantity = ammo.ammo_cart_item.quantity + 1;
+    } else {
+      ammo = await Ammo.findByPk(ammoId);
+    }
+
+    await ammoCart.addAmmo(ammo, {
+      through: { quantity: newQuantity },
+    });
+
+    res.status(200).json({message: "Ammo bought!"});
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.removeAmmoFromCart = async (req, res, next) => {
+  const ammoId = req.params.ammoId;
+
+  try {
+    const ammoCart = await req.user.getAmmo_cart();
+    const cartAmmo = await ammoCart.getAmmos({ where: { id: ammoId } });
+
+    if(cartAmmo.length <= 0) {
+      const error = new Error("No ammo with given id was found!");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    await ammoCart.removeAmmo(cartAmmo);
+
+    res.status(200).json({ message: "Ammo successfully removed!" });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};

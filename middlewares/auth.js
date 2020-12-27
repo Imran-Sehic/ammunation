@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
   try {
     const authHeader = req.get("Authorization");
     if (!authHeader) {
@@ -17,14 +18,22 @@ module.exports = (req, res, next) => {
       req.isAuth = false;
     }
 
+    const user = await User.findByPk(decodedToken.userId);
+
+    if(!user) {
+      const error = new Error("No user with given id was found!");
+      error.statusCode = 404;
+      throw error;
+    }
+
     req.userId = decodedToken.userId;
-    req.user = decodedToken.user;
+    req.user = user;
     req.isAuth = true;
     next();
 
   } catch (err) {
     const error = new Error("Invalid token!");
-    error.code = 401;
-    throw error;
+    error.statusCode = 401;
+    next(error);
   }
 };
