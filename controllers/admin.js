@@ -1,23 +1,41 @@
-const sequelize = require("../util/db");
-const { DataTypes } = require("sequelize");
-const Weapon = require("../models/weapon")(sequelize, DataTypes);
-const Ammo = require("../models/ammo")(sequelize, DataTypes);
-const User = require("../models/user")(sequelize, DataTypes);
+const Weapon = require("../models/weapon");
+const Ammo = require("../models/ammo");
+const User = require("../models/user");
+const WeaponCart = require("../models/weapon_cart");
+const AmmoCart = require("../models/ammo_cart");
+const WeaponCartItem = require("../models/weapon_cart_item");
+const AmmoCartItem = require("../models/ammo_cart_item");
 
 exports.getProfile = async (req, res, next) => {};
+
+exports.getCart = async (req, res, next) => {
+  try {
+    const weaponCart = await req.user.getWeapon_cart();
+    const ammoCart = await req.user.getAmmo_cart();
+
+    const cartWeapons = await weaponCart.getWeapons();
+    const cartAmmos = await ammoCart.getAmmos();
+
+    res.status(200).json({ ammos: cartAmmos, weapons: cartWeapons });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+      next(err);
+    }
+  }
+};
 
 exports.createWeapon = (req, res, next) => {
   const { name, description, weaponType, caliber, price, imageUrl } = req.body;
 
   try {
-    const weapon = Weapon.create({
+    req.user.createWeapon({
       name,
       description,
       weaponType,
       caliber,
       price,
       imageUrl,
-      userId: req.userId,
     });
 
     res.status(200).json({ message: "Weapon created successfully!" });
@@ -57,10 +75,9 @@ exports.updateWeapon = async (req, res, next) => {
 
     await weapon.save();
 
-    res.status(200).json({message: "Weapon successfully updated!"});
-
+    res.status(200).json({ message: "Weapon successfully updated!" });
   } catch (err) {
-    if(!err.statusCode) {
+    if (!err.statusCode) {
       err.statusCode = 500;
       next(err);
     }
@@ -87,10 +104,9 @@ exports.deleteWeapon = async (req, res, next) => {
 
     await weapon.destroy();
 
-    res.status(200).json({message: "Weapon successfully deleted!"});
-
+    res.status(200).json({ message: "Weapon successfully deleted!" });
   } catch (err) {
-    if(!err.statusCode) {
+    if (!err.statusCode) {
       err.statusCode = 500;
       next(err);
     }
@@ -101,14 +117,13 @@ exports.createAmmo = (req, res, next) => {
   const { name, ammoType, quantity, caliber, price, imageUrl } = req.body;
 
   try {
-    const ammo = Ammo.create({
+    req.user.createAmmo({
       name,
       ammoType,
       quantity,
       caliber,
       price,
       imageUrl,
-      userId: req.userId,
     });
 
     res.status(200).json({ message: "Ammo created successfully!" });
@@ -120,7 +135,7 @@ exports.createAmmo = (req, res, next) => {
   }
 };
 
-exports.updateAmmo = (req, res, next) => {
+exports.updateAmmo = async (req, res, next) => {
   const ammoId = req.params.ammoId;
   const { name, ammoType, quantity, caliber, price, imageUrl } = req.body;
 
@@ -148,17 +163,16 @@ exports.updateAmmo = (req, res, next) => {
 
     await ammo.save();
 
-    res.status(200).json({message: "Ammo successfully updated!"});
-
+    res.status(200).json({ message: "Ammo successfully updated!" });
   } catch (err) {
-    if(!err.statusCode) {
+    if (!err.statusCode) {
       err.statusCode = 500;
       next(err);
     }
   }
 };
 
-exports.deleteAmmo = (req, res, next) => {
+exports.deleteAmmo = async (req, res, next) => {
   const ammoId = req.params.ammoId;
 
   try {
@@ -178,10 +192,9 @@ exports.deleteAmmo = (req, res, next) => {
 
     await ammo.destroy();
 
-    res.status(200).json({message: "Ammo successfully deleted!"});
-
+    res.status(200).json({ message: "Ammo successfully deleted!" });
   } catch (err) {
-    if(!err.statusCode) {
+    if (!err.statusCode) {
       err.statusCode = 500;
       next(err);
     }

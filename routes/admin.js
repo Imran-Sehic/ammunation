@@ -6,6 +6,8 @@ const auth = require("../middlewares/auth");
 
 router.get("/profile", auth, adminController.getProfile);
 
+router.get("/cart", auth, adminController.getCart);
+
 router.post(
   "/create-weapon",
   auth,

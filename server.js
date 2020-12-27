@@ -4,17 +4,13 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const routes = require("./routes/routes");
 const sequelize = require("./util/db");
-const { DataTypes } = require("sequelize");
-const User = require("./models/user")(sequelize, DataTypes);
-const Weapon = require("./models/weapon")(sequelize, DataTypes);
-const WeaponCart = require("./models/weapon_cart")(sequelize, DataTypes);
-const WeaponCartItem = require("./models/weapon_cart_item")(
-  sequelize,
-  DataTypes
-);
-const Ammo = require("./models/ammo")(sequelize, DataTypes);
-const AmmoCart = require("./models/ammo_cart")(sequelize, DataTypes);
-const AmmoCartItem = require("./models/ammo_cart_item")(sequelize, DataTypes);
+const User = require("./models/user");
+const Weapon = require("./models/weapon");
+const WeaponCart = require("./models/weapon_cart");
+const WeaponCartItem = require("./models/weapon_cart_item");
+const Ammo = require("./models/ammo");
+const AmmoCart = require("./models/ammo_cart");
+const AmmoCartItem = require("./models/ammo_cart_item");
 
 const app = express();
 
@@ -37,7 +33,7 @@ Weapon.belongsToMany(WeaponCart, { through: WeaponCartItem });
 Ammo.belongsToMany(AmmoCart, { through: AmmoCartItem });
 
 sequelize
-  .sync({ force: true })
+  .sync()
   .then(() => {
     app.listen(process.env.PORT || 5000, () => {
       console.log("server started");

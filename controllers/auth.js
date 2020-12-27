@@ -1,14 +1,12 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../util/db");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 const path = require("path");
 const ejs = require("ejs");
-const User = require("../models/user")(sequelize, DataTypes);
-const WeaponCart = require("../models/weapon_cart")(sequelize, DataTypes);
-const AmmoCart = require("../models/ammo_cart")(sequelize, DataTypes);
+const User = require("../models/user");
+const WeaponCart = require("../models/weapon_cart");
+const AmmoCart = require("../models/ammo_cart");
 
 exports.signup = async (req, res, next) => {
   const { firstname, lastname, age, password, email, imageUrl } = req.body;
@@ -43,13 +41,10 @@ exports.signup = async (req, res, next) => {
       }
     );
 
-    WeaponCart.create({
-      userId: savedUser.id
-    });
+    //console.log(Object.keys(savedUser.__proto__));
 
-    AmmoCart.create({
-      userId: savedUser.id
-    });
+    savedUser.createWeapon_cart();
+    savedUser.createAmmo_cart();
 
     const token = jwt.sign(
       {
@@ -137,7 +132,7 @@ exports.login = async (req, res, next) => {
 
     const token = jwt.sign(
       {
-        email: user.email,
+        user: user,
         userId: user.id.toString(),
       },
       process.env.JWT_SECRET,
