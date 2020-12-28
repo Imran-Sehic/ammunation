@@ -6,7 +6,21 @@ const AmmoCart = require("../models/ammo_cart");
 const WeaponCartItem = require("../models/weapon_cart_item");
 const AmmoCartItem = require("../models/ammo_cart_item");
 
-exports.getProfile = async (req, res, next) => {};
+exports.getProfile = async (req, res, next) => {
+  try {
+    const userWeapons = await req.user.getWeapons();
+    const userAmmos = await req.user.getAmmos();
+
+    res
+      .status(200)
+      .json({ user: req.user, weapons: userWeapons, ammos: userAmmos });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+      next(err);
+    }
+  }
+};
 
 exports.getCart = async (req, res, next) => {
   try {
@@ -90,7 +104,7 @@ exports.deleteWeapon = async (req, res, next) => {
   try {
     const weapons = await req.user.getWeapons({ where: { id: weaponId } });
 
-    if(weapons.length <= 0) {
+    if (weapons.length <= 0) {
       const error = new Error("No weapon found!");
       error.statusCode = 404;
       throw error;
@@ -173,7 +187,7 @@ exports.deleteAmmo = async (req, res, next) => {
   try {
     const ammos = await req.user.getAmmos({ where: { id: ammoId } });
 
-    if(ammos.length <= 0) {
+    if (ammos.length <= 0) {
       const error = new Error("No ammo found!");
       error.statusCode = 404;
       throw error;
