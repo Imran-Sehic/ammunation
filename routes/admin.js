@@ -92,6 +92,10 @@ router.delete("/delete-weapon/:weaponId", auth, adminController.deleteWeapon);
 
 router.delete("/delete-ammo/:ammoId", auth, adminController.deleteAmmo);
 
-router.post("/order", auth, adminController.order);
+router.get("/order", auth, adminController.order);
+
+router.get("/checkout/success", auth, adminController.checkoutSuccess);
+
+router.get("/checkout/cancel", auth, adminController.checkoutCancel);
 
 module.exports = router;

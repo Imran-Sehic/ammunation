@@ -1,10 +1,6 @@
 const Weapon = require("../models/weapon");
 const Ammo = require("../models/ammo");
-const User = require("../models/user");
-const WeaponCart = require("../models/weapon_cart");
-const AmmoCart = require("../models/ammo_cart");
-const WeaponCartItem = require("../models/weapon_cart_item");
-const AmmoCartItem = require("../models/ammo_cart_item");
+const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY);
 
 exports.getProfile = async (req, res, next) => {
   try {
@@ -204,4 +200,99 @@ exports.deleteAmmo = async (req, res, next) => {
   }
 };
 
-exports.order = (req, res, next) => {};
+exports.order = async (req, res, next) => {
+  let totalWeaponPrice = 0;
+  let totalWeapons = 0;
+
+  let totalAmmoPrice = 0;
+  let totalAmmos = 0;
+
+  try {
+    const weaponCart = await req.user.getWeapon_cart();
+    const cartWeapons = await weaponCart.getWeapons();
+    const ammoCart = await req.user.getAmmo_cart();
+    const cartAmmos = await ammoCart.getAmmos();
+
+    cartWeapons.forEach((weapon) => {
+      totalWeaponPrice += weapon.price * weapon.weapon_cart_item.quantity;
+      totalWeapons += weapon.weapon_cart_item.quantity;
+    });
+
+    cartAmmos.forEach((ammo) => {
+      totalAmmoPrice += ammo.price * ammo.ammo_cart_item.quantity;
+      totalAmmos += ammo.ammo_cart_item.quantity;
+    });
+
+    const session = stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        ...cartWeapons.map((weapon) => {
+          return {
+            name: weapon.name,
+            description: weapon.description,
+            amount: weapon.price * 100,
+            currency: "usd",
+            quantity: weapon.weapon_cart_item.quantity,
+          };
+        }),
+        ...ammoWeapons.map((ammo) => {
+          return {
+            name: ammo.name,
+            description: ammo.ammoType + ", " + ammo.caliber,
+            amount: ammo.price * 100,
+            currency: "usd",
+            quantity: ammo.ammo_cart_item.quantity,
+          };
+        }),
+      ],
+      success_url: req.protocol + "://" + req.get("host") + "/checkout/success",
+      cancel_url: req.protocol + "://" + req.get("host") + "/checkout/cancel",
+    });
+
+    res.status(200).json({
+      totalWeaponPrice: totalWeaponPrice,
+      totalWeapons: totalWeapons,
+      totalAmmoPrice: totalAmmoPrice,
+      totalAmmos: totalAmmos,
+      weapons: cartWeapons,
+      ammos: cartAmmos,
+      sessionId: session.id,
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+      next(err);
+    }
+  }
+};
+
+exports.checkoutSuccess = async (req, res, next) => {
+  try {
+    const weaponCart = await req.user.getWeapon_cart();
+    const cartWeapons = await weaponCart.getWeapons();
+
+    const ammoCart = await req.user.getAmmo_cart();
+    const cartAmmos = await ammoCart.getAmmos();
+
+    await weaponCart.removeWeapon(cartWeapons);
+    await ammoCart.removeAmmo(cartAmmos);
+
+    res.status(200).json({message: "Checkout succeded!"});
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+      next(err);
+    }
+  }
+};
+
+exports.checkoutCancel = (req, res, next) => {
+  try{
+    res.status(500).json({message: "Checkout canceled!"});
+  }catch(err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+      next(err);
+    }
+  }
+};
