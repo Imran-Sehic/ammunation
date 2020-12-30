@@ -9,13 +9,20 @@ const WeaponCart = require("../models/weapon_cart");
 const AmmoCart = require("../models/ammo_cart");
 
 exports.signup = async (req, res, next) => {
-  const { firstname, lastname, age, password, email, imageUrl } = req.body;
+  const { firstname, lastname, birth_date, password, email } = req.body;
+  const { profile_img } = req.file; 
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = new Error("Validation failed!");
     error.statusCode = 422;
     error.data = errors.array();
+    return next(error);
+  }
+
+  if(!profile_img) {
+    const error = new Error("No profile image was selected!");
+    error.statusCode = 422;
     return next(error);
   }
 
@@ -34,14 +41,12 @@ exports.signup = async (req, res, next) => {
       {
         firstname,
         lastname,
-        age,
+        birth_date,
         password: hashedPassword,
         email,
-        imageUrl,
+        profile_img: profile_img.path,
       }
     );
-
-    //console.log(Object.keys(savedUser.__proto__));
 
     savedUser.createWeapon_cart();
     savedUser.createAmmo_cart();

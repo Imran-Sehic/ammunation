@@ -28,14 +28,14 @@ const Weapon = sequelize.define("weapon", {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
-  imageUrl: {
+  weapon_img: {
     type: DataTypes.STRING,
     allowNull: false,
     get() {
-      return this.getDataValue("imageUrl").split(";");
+      return this.getDataValue("weapon_img").split(";");
     },
     set(val) {
-      this.setDataValue("imageUrl", val.join(";"));
+      this.setDataValue("weapon_img", val.join(";"));
     },
   },
 });

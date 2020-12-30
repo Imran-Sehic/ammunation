@@ -1,5 +1,7 @@
 const Weapon = require("../models/weapon");
 const Ammo = require("../models/ammo");
+const { validationResult } = require("express-validator");
+const fileHelper = require("../util/deleteFile");
 const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY);
 
 exports.getProfile = async (req, res, next) => {
@@ -36,7 +38,28 @@ exports.getCart = async (req, res, next) => {
 };
 
 exports.createWeapon = (req, res, next) => {
-  const { name, description, weaponType, caliber, price, imageUrl } = req.body;
+  const { name, description, weaponType, caliber, price } = req.body;
+  const weapon_img = req.files;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error("Validation failed!");
+    error.statusCode = 422;
+    error.data = errors.array();
+    return next(error);
+  }
+
+  if (!weapon_img) {
+    const error = new Error("No weapon image is selected");
+    error.statusCode = 422;
+    return next(error);
+  }
+
+  if(weapon_img.length > 3) {
+    const error = new Error("No more than 3 images can be selected!");
+    error.statusCode = 422;
+    return next(error);
+  }
 
   try {
     req.user.createWeapon({
@@ -45,7 +68,7 @@ exports.createWeapon = (req, res, next) => {
       weaponType,
       caliber,
       price,
-      imageUrl,
+      weapon_img: weapon_img,
     });
 
     res.status(200).json({ message: "Weapon created successfully!" });
@@ -59,7 +82,16 @@ exports.createWeapon = (req, res, next) => {
 
 exports.updateWeapon = async (req, res, next) => {
   const weaponId = req.params.weaponId;
-  const { name, description, weaponType, caliber, price, imageUrl } = req.body;
+  const { name, description, weaponType, caliber, price } = req.body;
+  const weapon_img = req.files;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error("Validation failed!");
+    error.statusCode = 422;
+    error.data = errors.array();
+    return next(error);
+  }
 
   try {
     const weapon = await Weapon.findByPk(weaponId);
@@ -76,12 +108,24 @@ exports.updateWeapon = async (req, res, next) => {
       throw error;
     }
 
+    if(weapon_img.length > 3) {
+      const error = new Error("No more than 3 images can be selected!");
+      error.statusCode = 422;
+      throw error;
+    }
+
+    if (weapon_img) {
+      weapon.weapon_img.forEach((image) => {
+        fileHelper.deleteFile(image);
+      });
+      weapon.weapon_img = weapon_img;
+    }
+
     weapon.name = name;
     weapon.description = description;
     weapon.weaponType = weaponType;
     weapon.caliber = caliber;
     weapon.price = price;
-    weapon.imageUrl = imageUrl;
 
     await weapon.save();
 
@@ -106,6 +150,10 @@ exports.deleteWeapon = async (req, res, next) => {
       throw error;
     }
 
+    weapons[0].weapon_img.forEach((image) => {
+      fileHelper.deleteFile(image);
+    });
+
     await Weapon.destroy({ where: { id: weaponId } });
 
     res.status(200).json({ message: "Weapon successfully deleted!" });
@@ -119,7 +167,27 @@ exports.deleteWeapon = async (req, res, next) => {
 
 exports.createAmmo = (req, res, next) => {
   const { name, ammoType, quantity, caliber, price, imageUrl } = req.body;
-  console.log(Object.keys(req.user.__proto__));
+  const ammo_img = req.files;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error("Validation failed!");
+    error.statusCode = 422;
+    error.data = errors.array();
+    return next(error);
+  }
+
+  if (!ammo_img) {
+    const error = new Error("No ammo image is selected!");
+    error.statusCode = 422;
+    return next(error);
+  }
+
+  if(ammo_img.length > 3) {
+    const error = new Error("No more than 3 images can be selected!");
+    error.statusCode = 422;
+    return next(error);
+  }
 
   try {
     req.user.createAmmo({
@@ -128,7 +196,7 @@ exports.createAmmo = (req, res, next) => {
       quantity,
       caliber,
       price,
-      imageUrl,
+      ammo_img: ammo_img,
     });
 
     res.status(200).json({ message: "Ammo created successfully!" });
@@ -142,7 +210,16 @@ exports.createAmmo = (req, res, next) => {
 
 exports.updateAmmo = async (req, res, next) => {
   const ammoId = req.params.ammoId;
-  const { name, ammoType, quantity, caliber, price, imageUrl } = req.body;
+  const { name, ammoType, quantity, caliber, price } = req.body;
+  const ammo_img = req.files;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error("Validation failed!");
+    error.statusCode = 422;
+    error.data = errors.array();
+    return next(error);
+  }
 
   try {
     const ammo = await Ammo.findByPk(ammoId);
@@ -159,12 +236,24 @@ exports.updateAmmo = async (req, res, next) => {
       throw error;
     }
 
+    if(ammo_img.length > 3) {
+      const error = new Error("No more than 3 images can be selected!");
+      error.statusCode = 422;
+      throw error;
+    }
+
+    if(ammo_img) {
+      ammo.ammo_img.forEach((image) => {
+        fileHelper.deleteFile(image);
+      });
+      ammo.ammo_img = ammo_img;
+    }
+
     ammo.name = name;
     ammo.ammoType = ammoType;
     ammo.quantity = quantity;
     ammo.caliber = caliber;
     ammo.price = price;
-    ammo.imageUrl = imageUrl;
 
     await ammo.save();
 
@@ -188,6 +277,10 @@ exports.deleteAmmo = async (req, res, next) => {
       error.statusCode = 404;
       throw error;
     }
+
+    ammos[0].ammo_img.forEach((image) => {
+      fileHelper.deleteFile(image);
+    });
 
     await Ammo.destroy({ where: { id: ammoId } });
 
@@ -277,7 +370,7 @@ exports.checkoutSuccess = async (req, res, next) => {
     await weaponCart.removeWeapon(cartWeapons);
     await ammoCart.removeAmmo(cartAmmos);
 
-    res.status(200).json({message: "Checkout succeded!"});
+    res.status(200).json({ message: "Checkout succeded!" });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -287,9 +380,9 @@ exports.checkoutSuccess = async (req, res, next) => {
 };
 
 exports.checkoutCancel = (req, res, next) => {
-  try{
-    res.status(500).json({message: "Checkout canceled!"});
-  }catch(err) {
+  try {
+    res.status(500).json({ message: "Checkout canceled!" });
+  } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
       next(err);

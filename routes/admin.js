@@ -3,6 +3,8 @@ const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const adminController = require("../controllers/admin");
 const auth = require("../middlewares/auth");
+const multer = require("multer");
+const {fileStorage, fileFilter} = require("../config/multer");
 
 router.get("/profile", auth, adminController.getProfile);
 
@@ -11,6 +13,7 @@ router.get("/cart", auth, adminController.getCart);
 router.post(
   "/create-weapon",
   auth,
+  multer({ storage: fileStorage, fileFilter: fileFilter }).array("weapon_img", 3),
   [
     body("name")
       .isLength({ min: 4 })
@@ -31,6 +34,7 @@ router.post(
 router.post(
   "/create-ammo",
   auth,
+  multer({ storage: fileStorage, fileFilter: fileFilter }).array("ammo_img", 3),
   [
     body("name")
       .isLength({ min: 4 })
@@ -51,6 +55,7 @@ router.post(
 router.put(
   "/update-weapon/:weaponId",
   auth,
+  multer({ storage: fileStorage, fileFilter: fileFilter }).array("weapon_img", 3),
   [
     body("name")
       .isLength({ min: 4 })
@@ -71,6 +76,7 @@ router.put(
 router.put(
   "/update-ammo/:ammoId",
   auth,
+  multer({ storage: fileStorage, fileFilter: fileFilter }).array("ammo_img", 3),
   [
     body("name")
       .isLength({ min: 4 })

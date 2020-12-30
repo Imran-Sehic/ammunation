@@ -16,8 +16,8 @@ const User = sequelize.define("user", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  age: {
-    type: DataTypes.INTEGER,
+  birth_date: {
+    type: DataTypes.STRING,
     allowNull: false,
   },
   password: {
@@ -28,7 +28,7 @@ const User = sequelize.define("user", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  imageUrl: {
+  profile_img: {
     type: DataTypes.STRING,
     allowNull: false,
   },

@@ -28,14 +28,14 @@ const Ammo = sequelize.define("ammo", {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
-  imageUrl: {
+  ammo_img: {
     type: DataTypes.STRING,
     allowNull: false,
     get() {
-      return this.getDataValue("imageUrl").split(";");
+      return this.getDataValue("ammo_img").split(";");
     },
     set(val) {
-      this.setDataValue("imageUrl", val.join(";"));
+      this.setDataValue("ammo_img", val.join(";"));
     },
   },
 });
