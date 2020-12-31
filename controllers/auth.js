@@ -4,13 +4,14 @@ const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 const path = require("path");
 const ejs = require("ejs");
+const tokensGenerator = require("../util/jwtGenerator");
 const User = require("../models/user");
 const WeaponCart = require("../models/weapon_cart");
 const AmmoCart = require("../models/ammo_cart");
 
 exports.signup = async (req, res, next) => {
   const { firstname, lastname, birth_date, password, email } = req.body;
-  const { profile_img } = req.file; 
+  const profile_img = req.file;
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -20,7 +21,7 @@ exports.signup = async (req, res, next) => {
     return next(error);
   }
 
-  if(!profile_img) {
+  if (!profile_img) {
     const error = new Error("No profile image was selected!");
     error.statusCode = 422;
     return next(error);
@@ -37,16 +38,14 @@ exports.signup = async (req, res, next) => {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const savedUser = await User.create(
-      {
-        firstname,
-        lastname,
-        birth_date,
-        password: hashedPassword,
-        email,
-        profile_img: profile_img.path,
-      }
-    );
+    const savedUser = await User.create({
+      firstname,
+      lastname,
+      birth_date,
+      password: hashedPassword,
+      email,
+      profile_img: profile_img.path,
+    });
 
     savedUser.createWeapon_cart();
     savedUser.createAmmo_cart();
@@ -56,7 +55,7 @@ exports.signup = async (req, res, next) => {
         email: savedUser.email,
         userId: savedUser.id.toString(),
       },
-      process.env.JWT_SECRET,
+      process.env.EMAIL_JWT_SECRET,
       { expiresIn: "1d" }
     );
 
@@ -135,16 +134,19 @@ exports.login = async (req, res, next) => {
       throw error;
     }
 
-    const token = jwt.sign(
-      {
-        user: user,
-        userId: user.id.toString(),
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+    tokens = tokensGenerator(
+      process.env.ACCESS_JWT_SECRET,
+      process.env.REFRESH_JWT_SECRET,
+      user
     );
 
-    res.status(200).json({ token: token, userId: user.id.toString() });
+    res
+      .status(200)
+      .json({
+        token: tokens.accessToken,
+        refresh: tokens.refreshToken,
+        userId: user.id.toString(),
+      });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -157,7 +159,7 @@ exports.verify = async (req, res, next) => {
   const token = req.params.token;
 
   try {
-    let decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    let decodedToken = jwt.verify(token, process.env.EMAIL_JWT_SECRET);
     if (!decodedToken) {
       const error = new Error("Invalid token!");
       error.statusCode = 403;

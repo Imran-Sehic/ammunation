@@ -68,7 +68,7 @@ exports.createWeapon = (req, res, next) => {
       weaponType,
       caliber,
       price,
-      weapon_img: weapon_img,
+      weapon_img: weapon_img.map(img => img.path),
     });
 
     res.status(200).json({ message: "Weapon created successfully!" });
